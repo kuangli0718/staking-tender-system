@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+.DS_Store
+.vscode/
+coverage/
+*.log
+
+# Foundry
+cache/
+out/
+broadcast/
+
+# AI / local tooling
+.agents/
+.codex/
+.superpowers/
+.codegraph/
+.worktrees/

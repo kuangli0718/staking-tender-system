@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Staking Tender Platform</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="logo-mark">ST</div>
+      <div class="hero-copy">
+        <p class="eyebrow">Staking Tender Platform</p>
+        <h1>一个基于质押保证诚意的链上招投标平台</h1>
+        <p class="hero-text">
+          招标人可以发布任务并锁定报酬，投标人可以浏览平台任务、提交投标、揭标和交付成果。
+          这版页面优先追求“普通用户能看懂、能按顺序走通”。
+        </p>
+        <div class="status-row">
+          <div class="status-pill" id="wallet-pill">钱包未连接</div>
+          <div class="status-pill muted" id="network-pill">未识别网络</div>
+          <div class="status-pill muted" id="contract-pill">合约未加载</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel connect-panel">
+      <div class="panel-head">
+        <div>
+          <h2>开始使用</h2>
+          <p class="subtle">
+            用户只需要连接钱包并加载系统，平台会自动读取最近一次部署的合约，
+            不需要手动填写合约地址。
+          </p>
+        </div>
+      </div>
+      <div class="connect-actions">
+        <button id="connect-wallet" class="button primary">1. 连接钱包</button>
+        <button id="load-contract" class="button">2. 加载平台</button>
+        <button id="refresh-market" class="button ghost">刷新平台任务</button>
+      </div>
+      <div class="grid cols-2">
+        <label>
+          <span>当前账户</span>
+          <input id="account-display" disabled placeholder="连接钱包后自动显示" />
+        </label>
+        <label>
+          <span>当前平台合约</span>
+          <input id="contract-display" disabled placeholder="加载平台后自动显示" />
+        </label>
+      </div>
+    </section>
+
+    <section class="panel role-entry">
+      <div class="panel-head">
+        <div>
+          <h2>选择你要做什么</h2>
+          <p class="subtle">点击下面其中一个身份入口，页面会切换到对应的使用流程。</p>
+        </div>
+      </div>
+      <div class="entry-grid">
+        <button class="entry-card active" id="show-publisher">
+          <span class="entry-title">我要招标</span>
+          <span class="entry-text">发布任务、选择中标人、验收成果</span>
+        </button>
+        <button class="entry-card" id="show-bidder">
+          <span class="entry-title">我要投标</span>
+          <span class="entry-text">浏览平台任务、提交投标、揭标、交付成果</span>
+        </button>
+      </div>
+    </section>
+
+    <section id="publisher-view" class="role-view">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>招标人中心</h2>
+            <p class="subtle">先创建任务，系统会自动生成任务 ID。之后你可以选择中标人并验收。</p>
+          </div>
+        </div>
+
+        <div class="grid cols-2">
+          <label>
+            <span>任务说明</span>
+            <textarea id="task-description" rows="5">帮我完成一个网页原型，交付截图和演示视频。</textarea>
+          </label>
+          <div class="stack">
+            <label>
+              <span>报酬（ETH）</span>
+              <input id="create-reward" value="1" />
+            </label>
+            <label>
+              <span>发布押金（ETH）</span>
+              <input id="create-publisher-stake" value="0.2" />
+            </label>
+          </div>
+        </div>
+
+        <div class="grid cols-4">
+          <label>
+            <span>竞标期（分钟）</span>
+            <input id="create-bidding-minutes" type="number" min="1" value="30" />
+          </label>
+          <label>
+            <span>揭标期（分钟）</span>
+            <input id="create-reveal-minutes" type="number" min="1" value="30" />
+          </label>
+          <label>
+            <span>执行期（分钟）</span>
+            <input id="create-execution-minutes" type="number" min="1" value="180" />
+          </label>
+          <label>
+            <span>验收期（分钟）</span>
+            <input id="create-review-minutes" type="number" min="1" value="60" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button id="create-task" class="button primary">发布招标任务</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>当前任务管理</h2>
+            <p class="subtle">创建任务后，这里会自动显示任务信息。你也可以手动切换任务 ID 查看。</p>
+          </div>
+        </div>
+
+        <div class="grid cols-3">
+          <label>
+            <span>当前任务 ID</span>
+            <input id="shared-task-id" type="number" min="1" value="1" />
+          </label>
+          <label>
+            <span>中标人地址</span>
+            <input id="winner-address" placeholder="投标人揭标成功后填写" />
+          </label>
+          <div class="actions inline">
+            <button id="refresh-task" class="button ghost">刷新任务信息</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="select-winner" class="button">选择中标人</button>
+          <button id="approve-work" class="button primary">验收通过</button>
+        </div>
+
+        <pre id="task-output" class="output"></pre>
+        <div class="top-gap" id="publisher-bidder-panel-root"></div>
+      </section>
+    </section>
+
+    <section id="bidder-view" class="role-view hidden">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>平台任务列表</h2>
+            <p class="subtle">先看平台上有哪些任务，再选择你想投标的任务。</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="refresh-market-inline" class="button ghost">刷新任务列表</button>
+        </div>
+        <div id="market-list" class="market-list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>投标人中心</h2>
+            <p class="subtle">先从上面选中一个任务，再按顺序提交投标、揭标、交付成果。</p>
+          </div>
+        </div>
+
+        <div class="grid cols-3">
+          <label>
+            <span>我要投的任务 ID</span>
+            <input id="selected-task-id" type="number" min="1" value="1" />
+          </label>
+          <label>
+            <span>报价（ETH）</span>
+            <input id="commit-quote" value="0.8" />
+          </label>
+          <label>
+            <span>投标押金（ETH）</span>
+            <input id="commit-stake" value="0.1" />
+          </label>
+          <label>
+            <span>随机盐</span>
+            <input id="commit-salt" value="salt-demo-1" />
+          </label>
+          <label>
+            <span>能力证明说明</span>
+            <input id="proof-text" value="我做过类似项目并能按时交付" />
+          </label>
+          <label>
+            <span>成果说明</span>
+            <input id="submission-text" value="任务成果 v1" />
+          </label>
+        </div>
+
+        <div class="actions wrap">
+          <button id="commit-bid" class="button primary">提交投标</button>
+          <button id="read-my-bid" class="button ghost">查看我的投标</button>
+          <button id="reveal-bid" class="button">揭标</button>
+          <button id="submit-work" class="button">提交成果</button>
+        </div>
+
+        <div class="grid cols-2 top-gap">
+          <label>
+            <span>揭标报价（ETH）</span>
+            <input id="reveal-quote" value="0.8" />
+          </label>
+          <label>
+            <span>揭标随机盐</span>
+            <input id="reveal-salt" value="salt-demo-1" />
+          </label>
+        </div>
+
+        <pre id="bid-output" class="output"></pre>
+      </section>
+    </section>
+
+    <details class="panel advanced">
+      <summary>高级操作与排查</summary>
+      <div class="advanced-grid">
+        <button id="claim-refund" class="button ghost">领取落标押金</button>
+        <button id="claim-review-timeout" class="button ghost">验收超时索赔</button>
+        <button id="claim-execution-default" class="button ghost">执行超时索赔</button>
+        <button id="reclaim-idle-task" class="button ghost">回收闲置任务</button>
+        <button id="cancel-task" class="button danger">取消任务</button>
+      </div>
+    </details>
+
+    <section class="panel">
+      <h2>交互记录</h2>
+      <div id="activity-log" class="log"></div>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
